@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "bundle.css",
+  "sources": [
+    "App.svelte"
+  ],
+  "sourcesContent": [
+    "<script>\n  import { onMount } from 'svelte';\n  import { runningStats } from './stats.js';\n  import { pixelReduce } from './store.js';\n\n  const windowSize = 200;\n  const pollIntervalMs = 30;\n  const zthreshhold = 50;\n\n  const stats = runningStats(windowSize);\n  let ready = false;\n  let bang = null;\n  let now = Date.now();\n\n  /** @type {() => number} */\n  const getPixelSum = () =>\n    $pixelReduce((acc, color) => {\n      return acc + color[0] + color[1] + color[2];\n    }, 0);\n\n  const clear = () => {\n    stats.clear();\n    bang = null;\n  };\n\n  onMount(() => {\n    const interval = setInterval(() => {\n      const pixelSum = getPixelSum();\n      const { mean, std } = $stats;\n\n      ready = stats.ready();\n      now = Date.now();\n      if (stats.ready()) {\n        // console.log(Math.abs(pixelSum - mean), mean, std);\n        const zscore = Math.ceil(Math.abs((pixelSum - mean) / std));\n\n        if (zscore > zthreshhold && bang === null) {\n          console.log('BANG', zscore, Date.now());\n          bang = Date.now();\n        }\n      }\n\n      stats.addData(pixelSum);\n    }, pollIntervalMs);\n\n    return () => {\n      clearInterval(interval);\n      stats.clear();\n    };\n  });\n</script>\n\n<main>\n  <button on:click={clear}> Reset Stats </button>\n\n  {#if !ready}\n    <p>Calibrating...</p>\n  {:else if bang === null}\n    <p>Waiting for movement...</p>\n  {:else}\n    <p>BANG! {Math.floor((now - bang) / 1000)}s</p>\n  {/if}\n</main>\n\n<style>\n  :global(body) {\n    display: flex;\n    flex-direction: row;\n    gap: 2rem;\n  }\n</style>\n"
+  ],
+  "names": [],
+  "mappings": "AAiEU,IAAI,AAAE,CAAC,AACb,OAAO,CAAE,IAAI,CACb,cAAc,CAAE,GAAG,CACnB,GAAG,CAAE,IAAI,AACX,CAAC"
+}
