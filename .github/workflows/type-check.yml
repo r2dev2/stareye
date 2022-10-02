@@ -1,0 +1,19 @@
+name: Type Check
+
+on:
+  push:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:    
+      - uses: actions/checkout@v2
+     
+      - uses: c-hive/gha-yarn-cache@v1
+     
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run tests
+        run: yarn type:check
