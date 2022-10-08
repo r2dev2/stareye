@@ -3,8 +3,9 @@
   import { runningStats } from './stats.js';
   import { pixelReduce } from './store.js';
 
-  const windowSize = 300;
+  const windowSize = 100;
   const pollIntervalMs = 10;
+  const preCalPeriod = 3000;
 
   // statistics on sum of pixel values
   const stats = runningStats(windowSize);
@@ -28,6 +29,7 @@
   let ready = false;
   /** @type {number | null} */
   let bang = null;
+  let calibrationStart = Date.now();
   let now = Date.now();
 
   /** @type {() => number} */
@@ -40,6 +42,7 @@
     stats.clear();
     zstats.clear();
     bang = null;
+    calibrationStart = Date.now();
   };
 
   onMount(() => {
@@ -62,7 +65,7 @@
       }
       // calibrate still frame statistics during calibration period
       // pixelSum > 0 will be true when the video has loaded
-      else if (pixelSum > 0) {
+      else if (pixelSum > 0 && now - calibrationStart > preCalPeriod) {
         stats.addData(pixelSum);
         zstats.addData(zscore);
       }
@@ -95,7 +98,6 @@
 
 <style>
   :global(body) {
-    overflow: hidden;
     padding: 0px !important;
     background-color: black;
   }
