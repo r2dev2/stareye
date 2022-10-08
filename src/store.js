@@ -36,12 +36,13 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
 
   const video = document.createElement('video');
   video.setAttribute('autoplay', '');
+  video.setAttribute('playsinline', '');
   video.srcObject = $stream;
   // document.querySelector('.stream').appendChild(video);
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  document.querySelector('.stream').appendChild(canvas);
+  document.querySelector('.stream').appendChild(video);
 
   const getImgData = () => {
     try {

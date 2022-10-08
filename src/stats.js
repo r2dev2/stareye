@@ -48,11 +48,6 @@ const sum = (iterable) => {
 export const runningStats = (buffsize) => {
   const buffer = circularBuffer(buffsize);
 
-  // std will be a rough approximation
-  // instead of sqrt(1/n sum distance from mean)
-  // it is 1/n
-  //
-  // both mean and std are Math.ceil()ed to improve speed
   const store = writable({ mean: 0, std: 0 });
 
   /** @type {() => { mean: number, std: number }} */
