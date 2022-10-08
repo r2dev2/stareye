@@ -6,7 +6,7 @@ import { derived, readable } from 'svelte/store';
 
 /**
  * @template T
- * @typedef {(reducer: (acc: T, val: color) => T, initial: T) => T} Reduce
+ * @typedef {<T>(reducer: (acc: T, val: Color) => T, initial: T) => T} Reduce
  */
 
 export const videoStream = readable(
@@ -32,6 +32,7 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
     set((_fn, initial) => initial);
   }
 
+  /** @type {VoidFunction[]} */
   const unsubs = [];
 
   const video = document.createElement('video');
@@ -41,9 +42,10 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  document.querySelector('.stream').appendChild(video);
+  document.querySelector('.stream')?.appendChild(video);
 
   const getImgData = () => {
+    if (ctx === null) return [];
     try {
       const frame = ctx.getImageData(0, 0, video.videoWidth, video.videoHeight);
       return frame.data;
@@ -56,7 +58,7 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const interval = setInterval(() => {
-      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      ctx?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
     }, 0);
     unsubs.push(() => clearInterval(interval));
   };

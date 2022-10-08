@@ -26,6 +26,7 @@
   const zstats = runningStats(windowSize);
 
   let ready = false;
+  /** @type {number | null} */
   let bang = null;
   let now = Date.now();
 
@@ -44,7 +45,7 @@
   onMount(() => {
     const interval = setInterval(() => {
       const pixelSum = getPixelSum();
-      const { mean, std } = $stats;
+      const { mean } = $stats;
       const { mean: zmean, std: zstd } = $zstats;
 
       const zscore = pixelSum - mean;

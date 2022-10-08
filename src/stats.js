@@ -1,16 +1,36 @@
 import { writable } from 'svelte/store';
 
 /**
- * @typedef {import('svelte/store').Readable} Readable
- * @typedef {Readable<{
- *    mean: number, std: number }
- *  > & { addData: (data: number) => void }>} RunningStats
+ * @template T
+ * @typedef {import('svelte/store').Readable<T>} Readable<T>
  */
 
+/**
+ * @typedef {Readable<{
+ *    mean: number, std: number }
+ *  > & {
+ *     addData: (data: number) => void, clear: () => void, ready: () => boolean
+ *  }} RunningStats
+ */
+
+/**
+ * @template T
+ * @typedef {{
+ *  add: (data: T) => void,
+ *  get: () => T[],
+ *  clear: () => void,
+ * }} Buffer<T>
+ */
+
+/**
+ * @type {(buffsize: number) => Buffer<any>}
+ */
 const circularBuffer = (buffsize) => {
   let removeHead = 0;
+  /** @type {any[]} */
   const buffer = [];
 
+  /** @type {(data: any) => void} */
   const add = (data) => {
     if (buffer.length < buffsize) {
       buffer.push(data);
@@ -46,6 +66,7 @@ const sum = (iterable) => {
 
 /** @type {(buffsize: number) => RunningStats} */
 export const runningStats = (buffsize) => {
+  /** @type {Buffer<number>} */
   const buffer = circularBuffer(buffsize);
 
   const store = writable({ mean: 0, std: 0 });
