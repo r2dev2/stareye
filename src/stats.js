@@ -22,13 +22,16 @@ const circularBuffer = (buffsize) => {
     // hopefully speeeed
     // *copium
     removeHead++;
-    if (removeHead == buffer.length) {
+    if (removeHead === buffer.length) {
       removeHead = 0;
     }
   };
 
   const get = () => buffer;
-  const clear = () => buffer.splice(0);
+  const clear = () => {
+    buffer.splice(0);
+    removeHead = 0;
+  };
   return { add, clear, get };
 };
 
@@ -59,7 +62,6 @@ export const runningStats = (buffsize) => {
     const mean = one_n * sum(buff);
     const std = one_n * Math.sqrt(sum(buff.map((n) => Math.pow(n - mean, 2))));
     return { mean, std };
-    // return { mean: Math.ceil(mean), std: Math.ceil(std) };
   };
 
   /** @type {(data: number) => void} */
@@ -68,9 +70,12 @@ export const runningStats = (buffsize) => {
     store.set(computeStats());
   };
 
-  const clear = () => buffer.clear();
+  const clear = () => {
+    store.set({ mean: 0, std: 0 });
+    buffer.clear();
+  };
 
-  const ready = () => buffer.get().length == buffsize;
+  const ready = () => buffer.get().length === buffsize;
 
   return { ...store, addData, clear, ready };
 };
