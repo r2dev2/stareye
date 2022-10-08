@@ -75,21 +75,54 @@
 </script>
 
 <main>
-  <button on:click={clear}> Reset Stats </button>
+  <div
+    class="stats"
+    class:waiting={ready && bang === null}
+    class:ready={ready && bang !== null}
+  >
+    <button on:click={clear}> Reset Stats </button>
 
-  {#if !ready}
-    <p>Calibrating...</p>
-  {:else if bang === null}
-    <p>Waiting for movement...</p>
-  {:else}
-    <p>BANG! {Math.floor((now - bang) / 1000)}s</p>
-  {/if}
+    {#if !ready}
+      <p>Calibrating...</p>
+    {:else if bang === null}
+      <p>Waiting for movement...</p>
+    {:else}
+      <p>BANG! {Math.floor((now - bang) / 1000)}s</p>
+    {/if}
+  </div>
 </main>
 
 <style>
   :global(body) {
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
+    overflow: hidden;
+  }
+
+  main {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    padding: 2rem;
+  }
+
+  .stats {
+    --stats-border-color: red;
+    padding: 2rem;
+    background-color: white;
+    height: 10rem;
+    width: 20rem;
+    box-sizing: border-box;
+    border: 1rem solid var(--stats-border-color);
+    transition: 200ms ease-out;
+  }
+
+  .waiting {
+    --stats-border-color: goldenrod;
+  }
+
+  .ready {
+    --stats-border-color: lightgreen;
   }
 </style>
