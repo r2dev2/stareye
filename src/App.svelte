@@ -95,6 +95,19 @@
 <style>
   :global(body) {
     overflow: hidden;
+    padding: 0px !important;
+    background-color: black;
+  }
+
+  :global(video) {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    height: 100vh;
+    width: 100vw;
+    object-fit: fill;
+    z-index: 1;
+    transform: translateX(-50%);
   }
 
   main {
@@ -103,8 +116,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 1;
-    padding: 2rem;
+    z-index: 2;
+    padding: 3rem;
   }
 
   .stats {

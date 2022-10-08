@@ -13,7 +13,7 @@ export const videoStream = readable(
   /** @type {MediaStream | null} */ (null),
   (set) => {
     window.navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
+      .getUserMedia({ video: { facingMode: 'user' }, audio: false })
       .then(set)
       .catch((e) => console.error('Ooopsie woopsie', e));
   }
@@ -38,7 +38,6 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
   video.setAttribute('autoplay', '');
   video.setAttribute('playsinline', '');
   video.srcObject = $stream;
-  // document.querySelector('.stream').appendChild(video);
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
