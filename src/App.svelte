@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import * as Network from './network.js';
   import { runningStats } from './stats.js';
   import { pixelReduce } from './store.js';
 
@@ -75,6 +76,11 @@
       clearInterval(interval);
       clear();
     };
+  });
+
+  onMount(() => {
+    Network.setup();
+    return () => Network.cleanup();
   });
 </script>
 

@@ -1,5 +1,5 @@
 import { nocam } from './constants.js';
-import { derived, readable } from 'svelte/store';
+import { derived, readable, writable } from 'svelte/store';
 
 /**
  * @typedef {[number, number, number]} Color
@@ -88,3 +88,5 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
     unsubs.forEach((fn) => fn());
   };
 });
+
+export const id = writable(/** @type {string | null} */ (null));
