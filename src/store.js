@@ -1,3 +1,4 @@
+import { nocam } from './constants.js';
 import { derived, readable } from 'svelte/store';
 
 /**
@@ -12,6 +13,7 @@ import { derived, readable } from 'svelte/store';
 export const videoStream = readable(
   /** @type {MediaStream | null} */ (null),
   (set) => {
+    if (nocam) return;
     window.navigator.mediaDevices
       .getUserMedia({ video: { facingMode: 'user' }, audio: false })
       .then(set)
