@@ -90,6 +90,22 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
   };
 });
 
+export const currTime = readable(Date.now(), (set) => {
+  const interval = setInterval(() => set(Date.now()), 10);
+  return () => clearInterval(interval);
+});
 export const showJoinInfo = writable(false);
 export const id = writable(/** @type {string | null} */ (null));
 export const devices = writable(/** @type {Connection[]} */ ([]));
+export const bangs = writable(/** @type {number[]} */ ([]));
+export const calibratedDevices = writable(0);
+export const calibrated = writable(false);
+export const forceReset = writable({ reset: true, external: false });
+export const isReady = derived(
+  [calibratedDevices, calibrated, devices],
+  ([$numCal, $isCal, $dev]) => $numCal === $dev.length && $isCal
+);
+export const times = derived([bangs, currTime], ([$bangs, $currTime]) => [
+  ...$bangs.slice(1).map((time, i) => time - $bangs[i]),
+  ...($bangs.length ? [$currTime - $bangs[$bangs.length - 1]] : []),
+]);

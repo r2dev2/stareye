@@ -1,5 +1,13 @@
-import { devices, id } from './store.js';
-import { external, joinId } from './constants.js';
+import { get } from 'svelte/store';
+import {
+  bangs,
+  forceReset,
+  devices,
+  calibrated,
+  calibratedDevices,
+  id,
+} from './store.js';
+import { external, joinId, Messages } from './constants.js';
 
 /**
  * @typedef {import('peerjs').Peer} Peer
@@ -17,6 +25,9 @@ import { external, joinId } from './constants.js';
 
 export const peer = /** @type {Peer} */ (new external.Peer());
 
+/** @type {Array<() => void>} */
+const subscribes = [];
+
 export const setup = () => {
   peer.on('open', ($id) => {
     id.set($id);
@@ -25,6 +36,20 @@ export const setup = () => {
     }
   });
   peer.on('connection', openConnection);
+
+  subscribes.push(
+    forceReset.subscribe(({ reset, external }) => {
+      if (!reset || external) return;
+      emit({ type: Messages.RESET_STAT });
+    })
+  );
+
+  subscribes.push(
+    calibrated.subscribe(($calibrated) => {
+      if (!$calibrated) return;
+      emit({ type: Messages.CALIBRATE_FINISH });
+    })
+  );
 };
 
 export const openConnection = (/** @type {Connection} */ conn) => {
@@ -43,31 +68,40 @@ export const openConnection = (/** @type {Connection} */ conn) => {
   });
 };
 
+const emit = (/** @type {any} */ msg) =>
+  get(devices).forEach((conn) => conn.send(msg));
+
+export const sendBang = (/** @type {number} */ time) =>
+  emit({
+    type: Messages.BANG,
+    time,
+  });
+
 /** @type {DataResponder<ResetStatMsg>} */
 const peerResetStat = (_, __) => {
-  return;
+  forceReset.set({ reset: true, external: true });
 };
 
 /** @type {DataResponder<CalibrateFinishMsg>} */
 const peerCalibrateFinishMsg = (_id, __) => {
-  return;
+  calibratedDevices.update(($dev) => $dev + 1);
 };
 
 /** @type {DataResponder<BangMsg>} */
-const peerBangMsg = (_id, _data) => {
-  return;
+const peerBangMsg = (_, data) => {
+  bangs.update(($bangs) => [...$bangs, data.time].sort());
 };
 
 const dataResponders = [peerResetStat, peerCalibrateFinishMsg, peerBangMsg];
 
 /** @type {(otherId: string) => (data: PeerData) => void} */
 export const onData = (otherId) => (data) => {
-  if (0 < data.type && data.type < dataResponders.length) {
+  if (0 <= data.type && data.type < dataResponders.length) {
     // @ts-ignore
     dataResponders[data.type](otherId, data);
   }
 };
 
 export const cleanup = () => {
-  return;
+  subscribes.forEach((cb) => cb());
 };

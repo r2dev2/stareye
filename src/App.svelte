@@ -2,7 +2,18 @@
   import { onMount } from 'svelte';
   import * as Network from './network.js';
   import { runningStats } from './stats.js';
-  import { id, devices, showJoinInfo, pixelReduce } from './store.js';
+  import {
+    id,
+    times,
+    bangs,
+    calibrated,
+    calibratedDevices,
+    isReady,
+    devices,
+    showJoinInfo,
+    pixelReduce,
+    forceReset,
+  } from './store.js';
   import JoinInfo from './JoinInfo.svelte';
 
   const windowSize = 100;
@@ -45,7 +56,18 @@
     zstats.clear();
     bang = null;
     calibrationStart = Date.now();
+    $bangs = [];
+    $calibrated = false;
+    $calibratedDevices = 0;
   };
+
+  const resetStats = () => {
+    $forceReset = { reset: true, external: false };
+  };
+
+  $: if ($forceReset.reset) {
+    clear();
+  }
 
   onMount(() => {
     const interval = setInterval(() => {
@@ -56,13 +78,16 @@
       const zscore = pixelSum - mean;
       const zzscore = Math.ceil(Math.abs((zscore - zmean) / (zstd + 10)));
 
-      ready = stats.ready();
+      $calibrated = stats.ready();
+      ready = $isReady;
       now = Date.now();
 
       if (stats.ready()) {
-        if (bang === null && Math.abs(zzscore) > 2) {
+        if (bang === null && $isReady && Math.abs(zzscore) > 2) {
           console.log('BANG', zzscore, Date.now());
           bang = Date.now();
+          $bangs = [...$bangs, bang].sort();
+          Network.sendBang(Date.now());
         }
       }
       // calibrate still frame statistics during calibration period
@@ -100,7 +125,7 @@
       {:else}
         <button disabled>Device Paired</button>
       {/if}
-      <button on:click={clear}> Reset Stats </button>
+      <button on:click={resetStats}> Reset Stats</button>
     </div>
 
     {#if !ready}
@@ -108,7 +133,7 @@
     {:else if bang === null}
       <p>Waiting for movement...</p>
     {:else}
-      <p>BANG! {Math.floor((now - bang) / 1000)}s</p>
+      <p>BANG! {Math.floor($times[0] / 1000)}s</p>
     {/if}
   </div>
 </main>
