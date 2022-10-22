@@ -1,22 +1,78 @@
-# Svelte Template Hot
+# Stareye
 
-This is a copy of official [Svelte template](https://github.com/sveltejs/template) with added HMR support. It lives at https://github.com/rixo/svelte-template-hot.
+Time races with two phones.
 
-This also packages a working eslint configuration and github deploy action (deploys to `gh-pages`).
+<!-- Demo Video -->
+https://user-images.githubusercontent.com/50760816/197363377-cb861c58-85a2-4bf7-8429-b04d6831acda.mov
 
-This template aims to remain as close to the official template as possible. Please refer to official docs for general usage. For HMR specific stuff, see bellow.
+## Usage
 
-**:warning: Experimental :warning:**
+1. Go to https://r2dev2.github.io/stareye on a device.
+2. Press "Connect Device."
+3. Scan the qr code using another device. You will know the devices are connected when it says "Device Paired."
+4. Put each device at each endpoint. There must be no background movement seen by the camera. If there is, stareye will falsely detect movement.
+5. Press "Reset Stats." This will give you a 3 second window to clear the camera's viewing area.
+6. Wait for the border indicator on the info box to turn amber.
 
-This HMR implementation relies on Svelte's private & non documented API. This means that it can stop working with any new version of Svelte.
+![waiting for movement](https://user-images.githubusercontent.com/50760816/197363607-55dfd069-cf89-4c9e-a972-a11b568cee0c.png)
 
-Progress of Svelte HMR support can be tracked in [this issue](https://github.com/sveltejs/svelte/issues/3632).
+7. Run through the course.
+8. See the time taken to complete the course
 
-**Update 2020-02-24** We're [making progress](https://github.com/sveltejs/svelte/pull/3822) :)
+![bang detected](https://user-images.githubusercontent.com/50760816/197363636-45624ae9-70e8-42c0-b9b9-adde8fe21b39.png)
 
-**NOTE** This template pins the minor version of Svelte in `package.json`, using the [tilde comparator](https://docs.npmjs.com/misc/semver#tilde-ranges-123-12-1) because, in practice, HMR breakages tend to only happen with new minor versions of Svelte (not patch). And I don't want people to download a hot template with broken HMR... But, in your app, you can change this to your liking -- because you might be more interested in last version of Svelte than stable HMR, or be wise and pin the exact versions of all you dependencies.
+## Algorithm
 
-## Commands
+<!--
+Graphviz code to generate graph
+
+digraph G {
+    
+	subgraph cluster_0 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=white];
+		a0 [label="camera"]
+		a1 [label="Σ(r + g + b)\nfor each pixel"]
+		a2 [label="update running\nμ and σ stats"]
+		a3 [label="update running\nstats on μ and σ"]
+		a0 -> a1 -> a2 -> a3;
+		a3 -> a0 [label="repeat every 10ms"]
+		label = "calibration";
+	}
+
+	subgraph cluster_1 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=white];
+		b0 [label="camera"]
+		b1 [label="Σ(r + g + b)\nfor each pixel"]
+		b2 [label="check z score of z score\nof pixel sum"]
+		b0 -> b1 -> b2
+		b2->b0 [label="repeat every 10ms"]
+		label = "detection";
+	}
+	a3->b0 [label="after 100 samples"]
+    b2->end [label="  |z of z| > 2"]
+    end [label="time of movement"]
+}
+-->
+
+To detect motion, we take the z score of the z score of the sum of the rgb components of each pixel in the camera stream. If the magnitude of the z score of z scores is greater than 2, it is highly likely that there was movement. The two devices will then share the times at which they detected movement with each other. The time taken to complete the course is the difference between the timestamps of the devices.
+
+A flow chart of the motion detection algorithm is below.
+
+![flow chart](https://user-images.githubusercontent.com/50760816/197364248-e69cedda-3010-4647-873c-6e0767a8de3f.png)
+
+## Development
+
+### Setup
+
+```bash
+yarn
+```
+
+### Commands
 
 ```bash
 yarn build # build app in production
@@ -31,76 +87,6 @@ yarn format # format your app
 yarn format:check # check your app's formatting
 ```
 
-## Installation
+## Developers
 
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
-
-```bash
-npx degit r2dev2/svelte-template-hot svelte-app
-cd svelte-app
-yarn
-```
-
-Run the build script a first time, in order to avoid 404 errors about missing `bundle.css` in the browser:
-
-```bash
-yarn build
-```
-
-## Quick start
-
-```bash
-yarn dev
-```
-
-Navigate to [localhost:5000](http://localhost:5000). You should see your app running. Edit a component file in `src`, save it, and... Eyeball!
-
-## Usage
-
-HMR is supported both with [Nollup](https://github.com/PepsRyuu/nollup) or with Rollup itself with (very experimental) [rollup-plugin-hot](https://github.com/rixo/rollup-plugin-hot).
-
-Nollup implements the shortest possible path from a file change to the module reloaded in the browser and is all in-memory. Said otherwise, it is insanely fast. Also, it has been around for some time so it is quite battle tested already.
-
-The Rollup plugin on the other hand is still little more than a proof of concept by now, but it has better sourcemap support and error reporting (according to my own tastes at least).
-
-Support for both Nollup and Rollup HMR is provided by [rollup-plugin-svelte-hot](https://github.com/rixo/rollup-plugin-svelte-hot). Please report issues regarding HMR in [this plugin's tracker](https://github.com/rixo/rollup-plugin-svelte-hot/issues). Or [this template's project](https://github.com/rixo/svelte-template-hot/issues) might make more sense. You be the judge.
-
-### Start HMR server with Nollup
-
-```bash
-yarn dev:nollup
-```
-
-### Start Rollup with HMR support
-
-```bash
-yarn dev:rollup
-```
-
-### Start with LiveReload (no HMR)
-
-This is the default `dev` of official template.
-
-```bash
-yarn dev:livereload
-```
-
-### Start with default method
-
-Nollup HMR is also aliased as `dev` so you can simply run:
-
-```bash
-yarn dev
-```
-
-You can change the default `dev` script to your preferred method in the `scripts` section of `package.json`.
-
-**2020-06-29** Nollup has been made the default `dev` script (instead of Rollup) because just released Nollup 0.12.0 fixes support for Svelte sourcemaps and dynamic imports, and Nollup is monstrously fast (especially on the most important metrics, that is rebuild time in big projects)!
-
-The suggested workflow is to use Nollup for dev and enjoy instant feedback loop. If you need a plugin that doesn't work with Nollup, or if you are in a situation that Nollup makes harder to debug (mainly because of it running your code through eval), you can fallback on `yarn dev:rollup` (HMR with rollup-plugin-hot). If you have a bug that you suspect might be caused by HMR or HMR code transform, confirm by turning back to `yarn dev:livereload`.
-
-### Build
-
-```bash
-yarn build
-```
+Stareye is developed by [Ronak Badhe (r2dev2)](https://github.com/r2dev2/stareye).
