@@ -21,7 +21,7 @@ export const setup = () => {
   peer.on('open', ($id) => {
     id.set($id);
     if (joinId !== null) {
-      peer.connect(joinId);
+      openConnection(peer.connect(joinId));
     }
   });
   peer.on('connection', openConnection);

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import * as Network from './network.js';
   import { runningStats } from './stats.js';
-  import { id, showJoinInfo, pixelReduce } from './store.js';
+  import { id, devices, showJoinInfo, pixelReduce } from './store.js';
   import JoinInfo from './JoinInfo.svelte';
 
   const windowSize = 100;
@@ -95,7 +95,11 @@
     class:ready={ready && bang !== null}
   >
     <div class="controls">
-      <button on:click={() => showJoinInfo.set(true)}>Connect Device</button>
+      {#if $devices.length === 0}
+        <button on:click={() => showJoinInfo.set(true)}>Connect Device</button>
+      {:else}
+        <button disabled>Device Paired</button>
+      {/if}
       <button on:click={clear}> Reset Stats </button>
     </div>
 
