@@ -2,7 +2,8 @@
   import { onMount } from 'svelte';
   import * as Network from './network.js';
   import { runningStats } from './stats.js';
-  import { pixelReduce } from './store.js';
+  import { id, showJoinInfo, pixelReduce } from './store.js';
+  import JoinInfo from './JoinInfo.svelte';
 
   const windowSize = 100;
   const pollIntervalMs = 10;
@@ -85,12 +86,18 @@
 </script>
 
 <main>
+  {#if $id !== null && $showJoinInfo}
+    <JoinInfo id={$id} on:close={() => showJoinInfo.set(false)} />
+  {/if}
   <div
     class="stats"
     class:waiting={ready && bang === null}
     class:ready={ready && bang !== null}
   >
-    <button on:click={clear}> Reset Stats </button>
+    <div class="controls">
+      <button on:click={() => showJoinInfo.set(true)}>Connect Device</button>
+      <button on:click={clear}> Reset Stats </button>
+    </div>
 
     {#if !ready}
       <p>Calibrating...</p>
@@ -146,5 +153,10 @@
 
   .ready {
     --stats-border-color: lightgreen;
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: row;
   }
 </style>

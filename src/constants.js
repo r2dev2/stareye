@@ -7,4 +7,6 @@ export const nocam = params.get('nocam') !== null;
 export const external = {
   // @ts-ignore
   Peer: window.Peer,
+  // @ts-ignore,
+  QRious: window.QRious,
 };

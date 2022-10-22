@@ -89,4 +89,5 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
   };
 });
 
+export const showJoinInfo = writable(false);
 export const id = writable(/** @type {string | null} */ (null));
