@@ -14,6 +14,7 @@
     pixelReduce,
     forceReset,
   } from './store.js';
+  import { fmtTimeDelta } from './utils.js';
   import JoinInfo from './JoinInfo.svelte';
 
   const windowSize = 100;
@@ -87,7 +88,7 @@
           console.log('BANG', zzscore, Date.now());
           bang = Date.now();
           $bangs = [...$bangs, bang].sort();
-          Network.sendBang(Date.now());
+          Network.sendBang(bang);
         }
       }
       // calibrate still frame statistics during calibration period
@@ -133,7 +134,7 @@
     {:else if bang === null}
       <p>Waiting for movement...</p>
     {:else}
-      <p>BANG! {Math.floor($times[0] / 1000)}s</p>
+      <p>BANG! {fmtTimeDelta($times[0])}s</p>
     {/if}
   </div>
 </main>
