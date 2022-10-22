@@ -3,6 +3,7 @@ import { derived, readable, writable } from 'svelte/store';
 
 /**
  * @typedef {[number, number, number]} Color
+ * @typedef {import('peerjs').DataConnection} Connection
  */
 
 /**
@@ -91,3 +92,4 @@ export const pixelReduce = derived(videoStream, ($stream, set) => {
 
 export const showJoinInfo = writable(false);
 export const id = writable(/** @type {string | null} */ (null));
+export const devices = writable(/** @type {Connection[]} */ ([]));
